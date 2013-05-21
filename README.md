@@ -1,0 +1,2 @@
+grunt-wi-json-palette
+=====================
