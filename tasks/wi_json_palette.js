@@ -10,18 +10,164 @@
 
 module.exports = function(grunt) {
 
-  // Please see the Grunt documentation for more information regarding task
-  // creation: http://gruntjs.com/creating-tasks
+   // Please see the Grunt documentation for more information regarding task
+   // creation: http://gruntjs.com/creating-tasks
+   grunt.registerMultiTask('wi_json_palette', 'Creates json palette with wi controls.', function() {
+      // Merge task-specific and/or target-specific options with these defaults.
+      var options = this.options({
+         "repos": [],
+         "output": "./palette.json",
+         "pretty": true,
+         "indent": 3,
+         "defaultGroup": "general"
+      });
 
-  grunt.registerMultiTask('wi_json_palette', 'Your task description goes here.', function() {
-    // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      punctuation: '.',
-      separator: ', '
-    });
+      var done = this.async();
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
+      var fs = require('fs'),
+         path = require('path'),
+         configs = {},
+         repos = options.repos,
+         output = options.output,
+         pretty = options.pretty,
+         indent = options.indent,
+         defaultGroup = options.defaultGroup;
+
+      function Parallel(count) {
+         this.count = count;
+         this.ready = 0;
+      }
+
+      Parallel.prototype = {
+         oneReady: function() {
+            ++this.ready;
+            if(this.count === this.ready && this.callback) {
+               this.callback(this.result);
+            }
+         }
+      };
+
+      function readDir(dirPath, callback) {
+         fs.readdir(dirPath, function(err, files) {
+            if(err) {
+               console.log('Error', err);
+               callback(undefined, err);
+            } else {
+               callback(files);
+            }
+         });
+      }
+
+      function fileStat(filePath, parallel) {
+         fs.stat(filePath, function(err, stat) {
+            if(!err) {
+               if(stat.isDirectory()) {
+                  fileList(filePath, function(files) {
+                     parallel.result = parallel.result.concat(files);
+                     parallel.oneReady();
+                  });
+               } else if(stat.isFile()) {
+                  if(filePath.indexOf('.json') === filePath.length - 5) {
+                     parallel.result.push(filePath);
+                  }
+                  parallel.oneReady();
+               }
+            } else {
+               console.log('file stat error', err);
+               parallel.oneReady();
+            }
+         });
+      }
+
+      function fileList(dirPath, callback) {
+         var res = [];
+         readDir(dirPath, function(files) {
+            if(files) {
+               var parallel = new Parallel(files.length);
+               parallel.result = res;
+               parallel.callback = callback;
+               files.forEach(function(file) {
+                  var filePath = path.join(dirPath, file);
+                  fileStat(filePath, parallel);
+               });
+            } else {
+               callback();
+            }
+         });
+      }
+
+      function isCompontent(object) {
+         return object['name'] !== undefined && object['title'] !== undefined && object['version'] !== undefined && object['spec'] !== undefined;
+      }
+
+      function appendComponent(prefix, object) {
+         var group = object.group,
+            root = configs[prefix];
+         if(typeof(group) !== 'string') {
+            group = defaultGroup;
+         }
+         if(!root[group]) {
+            root[group] = [];
+         }
+         root[group].push(object);
+      }
+
+      function readFile(file, prefix, parallel) {
+         fs.readFile(file, function(err, data) {
+            if(err) {
+               console.log('readFile error', err);
+            } else {
+               var object;
+               try {
+                  object = JSON.parse(data);
+                  if(isCompontent(object)) {
+                     appendComponent(prefix, object);
+                  }
+               } catch(e) {
+                  console.log('File ' + file + ' has incorrect json data');
+               }
+            }
+            parallel.oneReady();
+         });
+      }
+
+      function readFiles(prefix, files, callback) {
+         var parallel = new Parallel(files.length);
+         parallel.callback = callback;
+         configs[prefix] = {};
+         files.forEach(function(file) {
+            readFile(file, prefix, parallel);
+         });
+      }
+
+      function buildRepo(repo, callback) {
+         fileList(repo.path, function(files) {
+            readFiles(repo.prefix, files, callback);
+         });
+      }
+
+      function buildRepos(repos, callback) {
+         var parallel = new Parallel(repos.length);
+         parallel.callback = callback;
+         repos.forEach(function(repo) {
+            buildRepo(repo, parallel.oneReady.bind(parallel));
+         });
+      }
+
+      function writeResult() {
+         var data;
+         if(pretty) {
+            data = JSON.stringify(configs, null, indent);
+         } else {
+            data = JSON.stringify(configs);
+         }
+         fs.writeFile(output, data, done);
+      }
+
+      buildRepos(repos, writeResult);
+
+      // Iterate over all specified file groups.
+      /*this.files.forEach(function(f) {
       // Concat specified files.
       var src = f.src.filter(function(filepath) {
         // Warn on and remove invalid source files (if nonull was set).
@@ -44,7 +190,7 @@ module.exports = function(grunt) {
 
       // Print a success message.
       grunt.log.writeln('File "' + f.dest + '" created.');
-    });
-  });
+    });*/
+   });
 
 };
