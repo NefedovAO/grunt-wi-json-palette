@@ -36,16 +36,6 @@ module.exports = function(grunt) {
             },
          },*/
          custom_options: {
-            options: {
-               "repos": [{
-                  "path": "D:/Users/nefedovao/Denwer/home/localhost/www/ws/lib/Control",
-                  "prefix": "core"
-               }],
-               "output": "./result.json",
-               "pretty": true,
-               "indent": 3,
-               "defaultGroup": "general"
-            }
          }
       },
 

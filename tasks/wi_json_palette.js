@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 
    // Please see the Grunt documentation for more information regarding task
    // creation: http://gruntjs.com/creating-tasks
-   grunt.registerMultiTask('wi_json_palette', 'Creates json palette with wi controls.', function() {
+   grunt.registerTask('wi-json-palette', 'Creates json palette with wi controls.', function() {
       // Merge task-specific and/or target-specific options with these defaults.
       var options = this.options({
          "repos": [],
