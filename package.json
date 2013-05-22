@@ -1,7 +1,7 @@
 {
   "name": "grunt-wi-json-palette",
   "description": "JSON palette builder for wi controls",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/NefedovAO/grunt-wi-json-palette",
   "author": {
     "name": "NefedovAO",

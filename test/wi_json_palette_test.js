@@ -23,26 +23,35 @@ var grunt = require('grunt');
 */
 
 exports.wi_json_palette = {
-  setUp: function(done) {
-    // setup here if necessary
-    done();
-  },
-  default_options: function(test) {
-    test.expect(1);
+   setUp: function(done){
+      // setup here if necessary
+      done();
+   },
+   simpleRun: function(test){
+      test.expect(1);
 
-    var actual = grunt.file.read('tmp/default_options');
-    var expected = grunt.file.read('test/expected/default_options');
-    test.equal(actual, expected, 'should describe what the default behavior is.');
+      var actual = grunt.file.read('tmp/simpleRun.json');
+      var expected = grunt.file.read('test/expected/simpleRun.json');
+      test.equal(actual, expected, 'Result file must be empty object "{}"');
 
-    test.done();
-  },
-  custom_options: function(test) {
-    test.expect(1);
+      test.done();
+   },
+   oneControl: function(test){
+      test.expect(1);
 
-    var actual = grunt.file.read('tmp/custom_options');
-    var expected = grunt.file.read('test/expected/custom_options');
-    test.equal(actual, expected, 'should describe what the custom option(s) behavior is.');
+      var actual = grunt.file.read('tmp/oneControl.json');
+      var expected = grunt.file.read('test/expected/oneControl.json');
+      test.equal(actual, expected, 'Result file must contain the same control file with prefix');
 
-    test.done();
-  },
+      test.done();
+   },
+   oneControlAndNonControl: function(test){
+      test.expect(1);
+
+      var actual = grunt.file.read('tmp/oneControlAndNonControl.json');
+      var expected = grunt.file.read('test/expected/oneControlAndNonControl.json');
+      test.equal(actual, expected, 'Result file must contain exactly one control, without mismatched data');
+
+      test.done();
+   }
 };

@@ -11,74 +11,86 @@ If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out th
 npm install grunt-wi-json-palette --save-dev
 ```
 
+Or you may want add it to dependencies:
+```json
+"devDependencies": {
+ "grunt-wi-json-palette": "~0.1.0"
+}
+```
+
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
 grunt.loadNpmTasks('grunt-wi-json-palette');
 ```
 
-## The "wi_json_palette" task
+## The "wi-json-palette" task
 
 ### Overview
-In your project's Gruntfile, add a section named `wi_json_palette` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `wi-json-palette` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  wi_json_palette: {
-    options: {
-      // Task-specific options go here.
-    },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
-  },
+   'wi-json-palette': {
+      subTaskName: {
+         options: {
+            // Task-specific options go here.
+         }
+      }
+   }
 })
 ```
 
 ### Options
 
-#### options.separator
+#### options.repos
+Type: `Array`
+Default value: `[]`
+
+An array with objects with repositories info. Each object must contain 2 fields: `path` and `prefix`. `prefix` would be used in output file, `path` would be searched recusevly.
+
+#### options.output
 Type: `String`
-Default value: `',  '`
+Default value: `./palette.json`
 
-A string value that is used to do something with whatever.
+File name with resulting json. All directories would be created automatically.
 
-#### options.punctuation
+#### options.pretty
+Type: `Boolean`
+Default value: `true`
+
+Use pretty print for json.
+
+#### options.indent
+Type: `Number`
+Default value: `3`
+
+Number of spaces for pretty print.
+
+#### options.defaultGroup
 Type: `String`
-Default value: `'.'`
+Default value: `general`
 
-A string value that is used to do something else with whatever else.
+Default controls group. If control doesn't specify it, would be used `defaultGroup` for it.
 
 ### Usage Examples
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+#### Simple run
+Building palette with one control.
 
 ```js
 grunt.initConfig({
-  wi_json_palette: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-})
-```
-
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
-
-```js
-grunt.initConfig({
-  wi_json_palette: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
+  'wi-json-palette': {
+      simpleRun: {
+         options: {
+            repos: [{
+               path: '/path/to/your/controls/folder/',
+               prefix: 'prefix/for/that/controls'
+            }],
+            output: './palette.json'
+         }
+      }
+   }
 })
 ```
 

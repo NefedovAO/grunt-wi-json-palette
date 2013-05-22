@@ -1,0 +1,17 @@
+{
+   "core": {
+      "general": [
+         {
+            "name": "Switcher",
+            "title": "Переключатель",
+            "version": "1.0",
+            "spec": "1.0",
+            "properties": {
+               "ws-config": {
+                  "title": "Базовая конфигурация"
+               }
+            }
+         }
+      ]
+   }
+}

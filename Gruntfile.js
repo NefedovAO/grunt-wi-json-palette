@@ -25,17 +25,33 @@ module.exports = function(grunt) {
       },
 
       // Configuration to be run (and then tested).
-      wi_json_palette: {
-         /*default_options: {
+      'wi-json-palette': {
+         simpleRun: {
             options: {
-               "repos": [],
-               "output": "./palette.json",
-               "pretty": true,
-               "indent": 3,
-               "defaultGroup": "general"
-            },
-         },*/
-         custom_options: {
+               repos: [{
+                  path: './test/fixtures/simpleRun/',
+                  prefix: 'core'
+               }],
+               output: './tmp/simpleRun.json'
+            }
+         },
+         oneControl: {
+            options: {
+               repos: [{
+                  path: './test/fixtures/oneControl/',
+                  prefix: 'core'
+               }],
+               output: './tmp/oneControl.json'
+            }
+         },
+         oneControlAndNonControl: {
+            options: {
+               repos: [{
+                  path: './test/fixtures/oneControlAndNonControl/',
+                  prefix: 'core'
+               }],
+               output: './tmp/oneControlAndNonControl.json'
+            }
          }
       },
 
@@ -56,9 +72,9 @@ module.exports = function(grunt) {
 
    // Whenever the "test" task is run, first clean the "tmp" dir, then run this
    // plugin's task(s), then test the result.
-   grunt.registerTask('test', ['clean', 'wi_json_palette', 'nodeunit']);
+   grunt.registerTask('test', ['clean', 'wi-json-palette', 'nodeunit']);
 
    // By default, lint and run all tests.
-   grunt.registerTask('default', ['jshint' /*, 'test'*/ , "wi_json_palette"]);
+   grunt.registerTask('default', ['jshint', 'test']);
 
 };

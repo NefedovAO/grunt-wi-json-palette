@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 
    // Please see the Grunt documentation for more information regarding task
    // creation: http://gruntjs.com/creating-tasks
-   grunt.registerTask('wi-json-palette', 'Creates json palette with wi controls.', function() {
+   grunt.registerMultiTask('wi-json-palette', 'Creates json palette with wi controls.', function() {
       // Merge task-specific and/or target-specific options with these defaults.
       var options = this.options({
          "repos": [],
@@ -27,6 +27,7 @@ module.exports = function(grunt) {
       var fs = require('fs'),
          path = require('path'),
          configs = {},
+         controlsCount = 0,
          repos = options.repos,
          output = options.output,
          pretty = options.pretty,
@@ -50,8 +51,8 @@ module.exports = function(grunt) {
       function readDir(dirPath, callback) {
          fs.readdir(dirPath, function(err, files) {
             if(err) {
-               console.log('Error', err);
-               callback(undefined, err);
+               grunt.log.error('Read dir error', err);
+               done(err);
             } else {
                callback(files);
             }
@@ -82,7 +83,7 @@ module.exports = function(grunt) {
       function fileList(dirPath, callback) {
          var res = [];
          readDir(dirPath, function(files) {
-            if(files) {
+            if(files && files.length) {
                var parallel = new Parallel(files.length);
                parallel.result = res;
                parallel.callback = callback;
@@ -110,6 +111,7 @@ module.exports = function(grunt) {
             root[group] = [];
          }
          root[group].push(object);
+         ++controlsCount;
       }
 
       function readFile(file, prefix, parallel) {
@@ -132,12 +134,17 @@ module.exports = function(grunt) {
       }
 
       function readFiles(prefix, files, callback) {
-         var parallel = new Parallel(files.length);
-         parallel.callback = callback;
-         configs[prefix] = {};
-         files.forEach(function(file) {
-            readFile(file, prefix, parallel);
-         });
+         if( files && files.length ){
+            var parallel = new Parallel(files.length);
+            parallel.callback = callback;
+            configs[prefix] = {};
+            files.forEach(function(file) {
+               readFile(file, prefix, parallel);
+            });
+         }
+         else{
+            callback();
+         }
       }
 
       function buildRepo(repo, callback) {
@@ -147,11 +154,16 @@ module.exports = function(grunt) {
       }
 
       function buildRepos(repos, callback) {
-         var parallel = new Parallel(repos.length);
-         parallel.callback = callback;
-         repos.forEach(function(repo) {
-            buildRepo(repo, parallel.oneReady.bind(parallel));
-         });
+         if( repos.length ){
+            var parallel = new Parallel(repos.length);
+            parallel.callback = callback;
+            repos.forEach(function(repo) {
+               buildRepo(repo, parallel.oneReady.bind(parallel));
+            });
+         }
+         else{
+            callback();
+         }
       }
 
       function writeResult() {
@@ -161,7 +173,9 @@ module.exports = function(grunt) {
          } else {
             data = JSON.stringify(configs);
          }
-         fs.writeFile(output, data, done);
+         grunt.file.write(output, data);
+         grunt.log.ok(controlsCount + ' control' + (controlsCount === 1 ? '' : 's') + ' appended to palette at ' + output);
+         done();
       }
 
       buildRepos(repos, writeResult);
